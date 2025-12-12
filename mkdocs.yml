@@ -1,9 +1,9 @@
 site_name: Public Health Indicator Recipe Cards
 site_description: Reproducible indicator calculations for public health epidemiology
-site_url: https://your-org.github.io/indicator-recipes
+site_url: https://lemmack.github.io/indicator-recipes
 
 repo_name: indicator-recipes
-repo_url: https://github.com/your-org/indicator-recipes
+repo_url: https://github.com/lemmack/indicator-recipes
 
 theme:
   name: material
@@ -62,4 +62,4 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/your-org/indicator-recipes
+      link: https://github.com/lemmack/indicator-recipes

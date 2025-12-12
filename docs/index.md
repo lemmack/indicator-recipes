@@ -60,11 +60,11 @@ print(f"Rate: {rate:.1f} (95% CI: {lower:.1f}-{upper:.1f})")
 
 ## Source Code
 
-The Python package and documentation source are available on [GitHub](https://github.com/your-org/indicator-recipes).
+The Python package and documentation source are available on [GitHub](https://github.com/lemmack/indicator-recipes).
 
 ```bash
 # Clone and install for development
-git clone https://github.com/your-org/indicator-recipes.git
+git clone https://github.com/lemmack/indicator-recipes.git
 cd indicator-recipes
 pip install -e ".[dev,docs]"
 pytest  # Run tests

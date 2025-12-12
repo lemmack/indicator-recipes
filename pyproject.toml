@@ -43,9 +43,9 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-org/indicator-recipes"
-Documentation = "https://your-org.github.io/indicator-recipes"
-Repository = "https://github.com/your-org/indicator-recipes"
+Homepage = "https://github.com/lemmack/indicator-recipes"
+Documentation = "https://lemmack.github.io/indicator-recipes"
+Repository = "https://github.com/lemmack/indicator-recipes"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/indicator_recipes"]
