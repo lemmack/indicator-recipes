@@ -82,4 +82,4 @@ pytest --cov=indicator_recipes
 
 ## License
 
-MIT
+GPL-3.0
