@@ -1,0 +1,65 @@
+site_name: Public Health Indicator Recipe Cards
+site_description: Reproducible indicator calculations for public health epidemiology
+site_url: https://your-org.github.io/indicator-recipes
+
+repo_name: indicator-recipes
+repo_url: https://github.com/your-org/indicator-recipes
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - content.code.copy
+    - content.code.annotate
+
+nav:
+  - Home: index.md
+  - Recipe Cards:
+    - Overview: recipes/index.md
+    - Crude Rate per 100k: recipes/crude-rate.md
+    - Rolling Average: recipes/rolling-average.md
+    - Age-Standardized Rate: recipes/age-standardized-rate.md
+    - Rate Ratio & Difference: recipes/rate-ratio-difference.md
+    - Age-Specific Rates: recipes/age-specific-rates.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - attr_list
+  - md_in_html
+  - def_list
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/your-org/indicator-recipes

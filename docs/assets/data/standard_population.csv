@@ -1,0 +1,6 @@
+age_group,weight,population_count,source_notes
+0-14,0.18,18000000,"Based on 2011 Canadian Standard Population (simplified 5-group version)"
+15-44,0.40,40000000,"Based on 2011 Canadian Standard Population (simplified 5-group version)"
+45-64,0.25,25000000,"Based on 2011 Canadian Standard Population (simplified 5-group version)"
+65-74,0.10,10000000,"Based on 2011 Canadian Standard Population (simplified 5-group version)"
+75+,0.07,7000000,"Based on 2011 Canadian Standard Population (simplified 5-group version)"

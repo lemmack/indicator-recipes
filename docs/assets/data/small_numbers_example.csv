@@ -1,0 +1,11 @@
+region,age_group,cases,population,notes
+Small Region,0-14,2,5000,Very small count - unstable
+Small Region,15-44,4,8000,Small count - unstable
+Small Region,45-64,8,6000,Borderline stability
+Small Region,65-74,12,4000,Adequate count
+Small Region,75+,18,3000,Adequate count
+Large Region,0-14,25,50000,Adequate count
+Large Region,15-44,45,80000,Adequate count
+Large Region,45-64,78,60000,Adequate count
+Large Region,65-74,95,40000,Adequate count
+Large Region,75+,120,30000,Adequate count

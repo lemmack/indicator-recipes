@@ -1,0 +1,11 @@
+region,age_group,cases,population
+Region A,0-14,12,15000
+Region A,15-44,35,22000
+Region A,45-64,48,18000
+Region A,65-74,62,12000
+Region A,75+,85,8000
+Region B,0-14,8,12000
+Region B,15-44,28,18000
+Region B,45-64,55,20000
+Region B,65-74,72,15000
+Region B,75+,95,10000

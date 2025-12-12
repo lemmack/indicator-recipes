@@ -1,0 +1,6 @@
+region,year,cases,population,description
+Region A,2023,150,50000,Urban health district
+Region B,2023,85,42000,Suburban health district
+Region C,2023,45,28000,Rural health district
+Region D,2023,210,78000,Metropolitan area
+Region E,2023,32,15000,Small town district
