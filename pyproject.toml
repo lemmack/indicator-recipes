@@ -36,6 +36,8 @@ dev = [
     "pytest-cov>=4.0",
     "ruff>=0.1.0",
     "pre-commit>=3.0",
+    "mypy>=1.0",
+    "pandas-stubs>=2.0",
 ]
 docs = [
     "mkdocs>=1.5",
@@ -76,3 +78,22 @@ convention = "google"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["scipy.*", "matplotlib.*"]
+ignore_missing_imports = true

@@ -33,7 +33,7 @@ def rate_per(
         Rate per scale population units.
 
     Raises:
-        ValueError: If population is zero or negative.
+        ValueError: If population is zero or negative, or scale is not positive.
 
     Examples:
         >>> rate_per(150, 50000)
@@ -41,6 +41,9 @@ def rate_per(
         >>> rate_per(25, 10000, scale=1000)
         2.5
     """
+    if scale <= 0:
+        raise ValueError(f"Scale must be positive, got {scale}")
+
     cases = np.asarray(cases)
     population = np.asarray(population)
 
@@ -48,6 +51,17 @@ def rate_per(
         raise ValueError("Population must be positive")
 
     rate = (cases / population) * scale
+
+    # Check for overflow/underflow
+    if np.any(~np.isfinite(rate)):
+        import warnings
+
+        warnings.warn(
+            "Result contains non-finite values (inf or nan), likely due to extreme inputs",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
     return float(rate) if rate.ndim == 0 else rate
 
 
@@ -66,13 +80,14 @@ def poisson_rate_ci(
         cases: Number of observed events (must be non-negative integer).
         population: Population at risk.
         scale: Multiplier for the rate (default 100,000).
-        alpha: Significance level (default 0.05 for 95% CI).
+        alpha: Significance level (default 0.05 for 95% CI). Must be in (0, 1).
 
     Returns:
         Tuple of (lower_bound, upper_bound) for the confidence interval.
 
     Raises:
-        ValueError: If cases is negative or population is non-positive.
+        ValueError: If cases is negative, population is non-positive,
+            scale is not positive, or alpha is not in (0, 1).
 
     Notes:
         For cases = 0, the lower bound is 0 and upper bound uses the one-sided
@@ -88,9 +103,13 @@ def poisson_rate_ci(
         (253.4, 352.0)
     """
     if cases < 0:
-        raise ValueError("Cases must be non-negative")
+        raise ValueError(f"Cases must be non-negative, got {cases}")
     if population <= 0:
-        raise ValueError("Population must be positive")
+        raise ValueError(f"Population must be positive, got {population}")
+    if scale <= 0:
+        raise ValueError(f"Scale must be positive, got {scale}")
+    if not (0 < alpha < 1):
+        raise ValueError(f"Alpha must be between 0 and 1 (exclusive), got {alpha}")
 
     cases = int(round(cases))
 
@@ -120,13 +139,16 @@ def rolling_mean(
 
     Args:
         series: Time series data (can contain NaN values).
-        window: Size of the moving window.
+        window: Size of the moving window. Must be positive.
         center: If True, set the labels at the center of the window.
         min_periods: Minimum number of observations required to compute a value.
-            If None, defaults to window size (requires full window).
+            If None, defaults to window size (requires full window). Must be positive.
 
     Returns:
         Series with rolling mean values.
+
+    Raises:
+        ValueError: If window is not positive, or min_periods is not positive.
 
     Notes:
         - NaN values in input are ignored in the calculation.
@@ -145,6 +167,12 @@ def rolling_mean(
         [1.0, 1.5, 2.0, 3.0, 4.0]
     """
     import pandas as pd
+
+    if window <= 0:
+        raise ValueError(f"Window must be positive, got {window}")
+
+    if min_periods is not None and min_periods <= 0:
+        raise ValueError(f"min_periods must be positive, got {min_periods}")
 
     if not isinstance(series, pd.Series):
         series = pd.Series(series)
@@ -199,35 +227,38 @@ def direct_age_standardized_rate(
         >>> round(direct_age_standardized_rate(counts, pop, std_weights), 1)
         377.5
     """
-    counts_by_age = np.asarray(counts_by_age, dtype=float)
-    pop_by_age = np.asarray(pop_by_age, dtype=float)
-    std_weights = np.asarray(std_weights, dtype=float)
+    if scale <= 0:
+        raise ValueError(f"Scale must be positive, got {scale}")
+
+    counts_arr: np.ndarray = np.asarray(counts_by_age, dtype=float)
+    pop_arr: np.ndarray = np.asarray(pop_by_age, dtype=float)
+    weights_arr: np.ndarray = np.asarray(std_weights, dtype=float)
 
     # Validate inputs
-    if not (len(counts_by_age) == len(pop_by_age) == len(std_weights)):
+    if not (len(counts_arr) == len(pop_arr) == len(weights_arr)):
         raise ValueError("All input arrays must have the same length")
 
-    if np.any(counts_by_age < 0):
+    if np.any(counts_arr < 0):
         raise ValueError("Counts cannot be negative")
 
-    if np.any(pop_by_age < 0):
+    if np.any(pop_arr < 0):
         raise ValueError("Population cannot be negative")
 
-    if np.any(std_weights < 0):
+    if np.any(weights_arr < 0):
         raise ValueError("Standard weights cannot be negative")
 
     # Normalize weights to sum to 1
-    weight_sum = np.sum(std_weights)
+    weight_sum = np.sum(weights_arr)
     if weight_sum <= 0:
         raise ValueError("Standard weights must sum to a positive value")
-    std_weights = std_weights / weight_sum
+    weights_arr = weights_arr / weight_sum
 
     # Handle zero population (exclude those age groups)
-    valid_mask = pop_by_age > 0
+    valid_mask = pop_arr > 0
 
     if not np.all(valid_mask):
         # Check if we're losing cases
-        lost_cases = np.sum(counts_by_age[~valid_mask])
+        lost_cases = np.sum(counts_arr[~valid_mask])
         if lost_cases > 0:
             import warnings
 
@@ -237,16 +268,16 @@ def direct_age_standardized_rate(
                 stacklevel=2,
             )
         # Re-normalize weights for valid groups only
-        std_weights = std_weights[valid_mask]
-        std_weights = std_weights / np.sum(std_weights)
-        counts_by_age = counts_by_age[valid_mask]
-        pop_by_age = pop_by_age[valid_mask]
+        weights_arr = weights_arr[valid_mask]
+        weights_arr = weights_arr / np.sum(weights_arr)
+        counts_arr = counts_arr[valid_mask]
+        pop_arr = pop_arr[valid_mask]
 
     # Calculate age-specific rates
-    age_specific_rates = counts_by_age / pop_by_age
+    age_specific_rates = counts_arr / pop_arr
 
     # Weight and sum
-    standardized_rate = np.sum(age_specific_rates * std_weights) * scale
+    standardized_rate = np.sum(age_specific_rates * weights_arr) * scale
 
     return float(standardized_rate)
 
@@ -321,7 +352,7 @@ def rate_difference(
         Rate difference per scale population (group A - group B).
 
     Raises:
-        ValueError: If populations are non-positive.
+        ValueError: If populations are non-positive or scale is not positive.
 
     Notes:
         - Positive value indicates excess cases in group A.
@@ -335,6 +366,8 @@ def rate_difference(
         >>> rate_difference(30, 15000, 40, 10000, scale=1000)
         -2.0
     """
+    if scale <= 0:
+        raise ValueError(f"Scale must be positive, got {scale}")
     if pop_a <= 0 or pop_b <= 0:
         raise ValueError("Populations must be positive")
 

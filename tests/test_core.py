@@ -287,3 +287,131 @@ class TestFlagSmallNumbers:
     def test_zero_cases(self):
         """Test with zero cases."""
         assert flag_small_numbers(0) is True
+
+
+class TestInputValidation:
+    """Tests for input validation across all functions."""
+
+    def test_rate_per_negative_scale(self):
+        """Test that negative scale raises error."""
+        with pytest.raises(ValueError, match="Scale must be positive"):
+            rate_per(10, 1000, scale=-100)
+
+    def test_rate_per_zero_scale(self):
+        """Test that zero scale raises error."""
+        with pytest.raises(ValueError, match="Scale must be positive"):
+            rate_per(10, 1000, scale=0)
+
+    def test_poisson_ci_negative_scale(self):
+        """Test that negative scale raises error in poisson_rate_ci."""
+        with pytest.raises(ValueError, match="Scale must be positive"):
+            poisson_rate_ci(10, 1000, scale=-100)
+
+    def test_poisson_ci_invalid_alpha_zero(self):
+        """Test that alpha=0 raises error."""
+        with pytest.raises(ValueError, match="Alpha must be between 0 and 1"):
+            poisson_rate_ci(10, 1000, alpha=0)
+
+    def test_poisson_ci_invalid_alpha_one(self):
+        """Test that alpha=1 raises error."""
+        with pytest.raises(ValueError, match="Alpha must be between 0 and 1"):
+            poisson_rate_ci(10, 1000, alpha=1)
+
+    def test_poisson_ci_invalid_alpha_negative(self):
+        """Test that negative alpha raises error."""
+        with pytest.raises(ValueError, match="Alpha must be between 0 and 1"):
+            poisson_rate_ci(10, 1000, alpha=-0.05)
+
+    def test_rolling_mean_negative_window(self):
+        """Test that negative window raises error."""
+        with pytest.raises(ValueError, match="Window must be positive"):
+            rolling_mean([1, 2, 3], window=-1)
+
+    def test_rolling_mean_zero_window(self):
+        """Test that zero window raises error."""
+        with pytest.raises(ValueError, match="Window must be positive"):
+            rolling_mean([1, 2, 3], window=0)
+
+    def test_rolling_mean_negative_min_periods(self):
+        """Test that negative min_periods raises error."""
+        with pytest.raises(ValueError, match="min_periods must be positive"):
+            rolling_mean([1, 2, 3], window=2, min_periods=-1)
+
+    def test_rolling_mean_zero_min_periods(self):
+        """Test that zero min_periods raises error."""
+        with pytest.raises(ValueError, match="min_periods must be positive"):
+            rolling_mean([1, 2, 3], window=2, min_periods=0)
+
+    def test_direct_asr_negative_scale(self):
+        """Test that negative scale raises error in direct_age_standardized_rate."""
+        with pytest.raises(ValueError, match="Scale must be positive"):
+            direct_age_standardized_rate([10], [1000], [1.0], scale=-100)
+
+    def test_rate_difference_negative_scale(self):
+        """Test that negative scale raises error in rate_difference."""
+        with pytest.raises(ValueError, match="Scale must be positive"):
+            rate_difference(10, 1000, 5, 1000, scale=-100)
+
+
+class TestReferenceImplementations:
+    """Tests comparing against known reference values."""
+
+    def test_poisson_ci_reference_ulm1990(self):
+        """Test Poisson CI against Ulm (1990) method.
+
+        For n=10 cases, 95% CI for count should be approximately [4.80, 18.39]
+        """
+        lower, upper = poisson_rate_ci(10, 100000, scale=100000, alpha=0.05)
+        assert abs(lower - 4.795) < 0.1
+        assert abs(upper - 18.39) < 0.1
+
+    def test_poisson_ci_zero_cases_upper_bound(self):
+        """Test upper bound when n=0 is approximately 3.69."""
+        lower, upper = poisson_rate_ci(0, 100000, scale=100000, alpha=0.05)
+        assert lower == 0.0
+        assert abs(upper - 3.69) < 0.1
+
+    def test_rate_ratio_textbook_example(self):
+        """Test rate ratio: 20/1000 vs 10/1000 = 2.0."""
+        rr = rate_ratio(20, 1000, 10, 1000)
+        assert rr == 2.0
+
+    def test_rate_difference_textbook_example(self):
+        """Test rate difference: (20-10)/1000 * 1000 = 10."""
+        rd = rate_difference(20, 1000, 10, 1000, scale=1000)
+        assert rd == 10.0
+
+    def test_age_standardized_rate_manual_calculation(self):
+        """Test ASR: manual calculation = 580 per 100k."""
+        counts = [5, 10, 15]
+        pop = [5000, 2000, 1000]
+        weights = [0.3, 0.5, 0.2]
+        asr = direct_age_standardized_rate(counts, pop, weights)
+        assert abs(asr - 580.0) < 0.1
+
+
+class TestEdgeCases:
+    """Tests for edge cases and boundary conditions."""
+
+    def test_rate_per_very_large_numbers(self):
+        """Test rate calculation with large numbers doesn't overflow."""
+        result = rate_per(1000000, 100000000, scale=100000)
+        assert result == 1000.0
+        assert np.isfinite(result)
+
+    def test_poisson_ci_large_count(self):
+        """Test Poisson CI with large count is reasonably narrow."""
+        lower, upper = poisson_rate_ci(10000, 100000)
+        width = upper - lower
+        rate = 10000 / 100000 * 100000
+        assert width < rate * 0.1
+
+    def test_rolling_mean_single_value(self):
+        """Test rolling mean with single value."""
+        result = rolling_mean([5.0], window=1, min_periods=1)
+        assert result.iloc[0] == 5.0
+
+    def test_rolling_mean_all_nan(self):
+        """Test rolling mean with all NaN values."""
+        result = rolling_mean([np.nan, np.nan, np.nan], window=2, min_periods=1)
+        assert all(pd.isna(result))

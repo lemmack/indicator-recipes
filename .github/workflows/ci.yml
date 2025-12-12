@@ -30,6 +30,10 @@ jobs:
         run: |
           ruff check src tests
 
+      - name: Type check with mypy
+        run: |
+          mypy src/indicator_recipes
+
       - name: Run tests
         run: |
           pytest --cov=indicator_recipes --cov-report=xml
